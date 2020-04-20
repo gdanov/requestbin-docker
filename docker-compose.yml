@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx
+    volumes:
+      - nginx-www:/usr/share/nginx/html
+
+  certbot:
+    image: certbot/certbot:latest
+    depends_on:
+      - nginx
+    volumes:
+      - nginx-www:/usr/share/nginx/html
+    command: certonly --webroot -w /usr/share/nginx/html -d gdanov.ddns.net --agree-tos --non-interactive --email georgi.danov@gmail.com
+
+  haproxy:
+    image: haproxy:latest
+    depends_on:
+      - requestbin
+      - certbot
+    ports:
+      - 9090:80
+      - 9093:443
+    volumes:
+      - .:/home/
+      - letsencrypt:/etc/letsencrypt
+    command: "-f /home/haproxy.cfg"
+
+  redis:
+    image: redis
+    
+  requestbin:
+    image: crccheck/requestbin
+    depends_on:
+      - redis
+    environment:
+      REDIS_URL: redis://redis:6379/0
+#    ports:
+#      - "8000:80"
+
+    
+volumes:
+  nginx-www:
+  letsencrypt:
+
+    
