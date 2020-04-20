@@ -19,9 +19,9 @@ services:
     depends_on:
       - requestbin
       - certbot
-    ports:
-      - 9090:80
-      - 9093:443
+#    ports:
+#      - 9090:80
+#      - 9093:443
     volumes:
       - .:/home/
       - letsencrypt:/etc/letsencrypt
