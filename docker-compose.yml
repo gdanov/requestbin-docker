@@ -12,16 +12,25 @@ services:
       - nginx
     volumes:
       - nginx-www:/usr/share/nginx/html
+      - letsencrypt:/etc/letsencrypt
     command: certonly --webroot -w /usr/share/nginx/html -d gdanov.ddns.net --agree-tos --non-interactive --email georgi.danov@gmail.com
 
+  haproxy-cert:
+    image: haproxy:latest
+    volumes:
+      - .:/home/
+      - letsencrypt:/etc/letsencrypt
+    entrypoint: /bin/bash -c "cat /etc/letsencrypt/live/gdanov.ddns.net/fullchain.pem /etc/letsencrypt/live/gdanov.ddns.net/privkey.pem | tee /etc/letsencrypt/live/gdanov.ddns.net/hproxycert.pem"
+    #command: "cat /etc/letsencrypt/live/gdanov.ddns.net/fullchain.pem /etc/letsencrypt/live/gdanov.ddns.net/privkey.pem | tee /etc/letsencrypt/live/gdanov.ddns.net/hproxycert.pem"
+      
   haproxy:
     image: haproxy:latest
     depends_on:
       - requestbin
       - certbot
-#    ports:
-#      - 9090:80
-#      - 9093:443
+    ports:
+      - 80:80
+      - 443:443
     volumes:
       - .:/home/
       - letsencrypt:/etc/letsencrypt
